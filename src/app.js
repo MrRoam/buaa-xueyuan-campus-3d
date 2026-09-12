@@ -5,6 +5,7 @@ import DATA from '../data/campus.geojson';
 import {createLandmark} from './landmarks.js';
 import {createCulturalLandmark} from './cultural-landmarks.js';
 
+export function startXueyuan(){
 const $=s=>document.querySelector(s), mobile=()=>innerWidth<701;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const origin=[116.34565,39.9790], extent=[-1000,-730,190,390];
@@ -59,7 +60,7 @@ for(const f of data){if(!f.p.building||!f.rings||['park','pitch','track','playgr
  if(heritage){for(const y of [height-1,height+.3]){const cornice=polyMesh(f.rings,.4,y,materials.trim);cornice.userData.building=b;}b.description='按地图保留老教学楼群轮廓与院落；浅色立面和层叠檐口参考北航公开照片，窗格、楼高及屋面细节为简化估算。';b.source='OSM 轮廓＋北航总务部改造资料；高度约 '+height+' m（估算）';}
  if(main){let minX=Math.min(...ring.map(v=>v[0])),maxX=Math.max(...ring.map(v=>v[0])),minZ=Math.min(...ring.map(v=>v[1])),maxZ=Math.max(...ring.map(v=>v[1]));for(let j=0;j<2;j++){const rx=c[0]+(j-.5)*Math.min(14,(maxX-minX)*.2),rz=c[1];if(pointIn([rx,rz],ring))box(5,1.7,4,rx,height+1.5,rz,materials.roof);}}
 }
-for(const b of buildings.filter(b=>b.landmark)){const batches=new Map();b.mesh.updateMatrixWorld(true);for(const child of [...b.mesh.children]){if(!child.isMesh||Array.isArray(child.material))continue;const g=child.geometry.clone();child.updateMatrix();g.applyMatrix4(child.matrix);const key=child.material;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(g);b.mesh.remove(child);child.geometry.dispose();}for(const [material,geos]of batches){const g=mergeGeometries(geos.map(x=>x.index?x.toNonIndexed():x),false);if(!g)continue;const m=new THREE.Mesh(g,material);m.castShadow=m.receiveShadow=true;m.userData.building=b;b.mesh.add(m);geos.forEach(x=>x.dispose());}}
+for(const b of buildings.filter(b=>b.landmark)){const batches=new Map();b.mesh.updateMatrixWorld(true);for(const child of [...b.mesh.children]){if(!child.isMesh||Array.isArray(child.material))continue;const g=child.geometry.clone();child.updateMatrix();g.applyMatrix4(child.matrix);g.deleteAttribute('uv');const key=child.material;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(g);b.mesh.remove(child);child.geometry.dispose();}for(const [material,geos]of batches){const g=mergeGeometries(geos.map(x=>x.index?x.toNonIndexed():x),false);if(!g)continue;const m=new THREE.Mesh(g,material);m.castShadow=m.receiveShadow=true;m.userData.building=b;b.mesh.add(m);geos.forEach(x=>x.dispose());}}
 // 北侧 H 座/架空连接：以 A、G 座之间的真实空隙定位，尺寸参考照片估计。
 const northBridge=[[-43,-72],[29,-74],[29,-44],[-43,-42],[-43,-72]];
 const bridge=polyMesh([northBridge],9,31.6,materials.main);facade(northBridge,9,31.6,true);
@@ -122,3 +123,4 @@ function animate(now){requestAnimationFrame(animate);if(document.hidden)return;c
  const a=controls.target.clone().project(camera),b=controls.target.clone().add(new THREE.Vector3(50,0,0)).project(camera);let px=Math.hypot((b.x-a.x)*innerWidth/2,(b.y-a.y)*innerHeight/2);if(px<20||px>110){$('#scale-line').style.width='50px';const d=camera.position.distanceTo(controls.target),m=2*d*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))/innerHeight*50;$('#scale-text').textContent='约 '+Math.round(m)+' m';}else{$('#scale-line').style.width=px+'px';$('#scale-text').textContent='约 50 m';}}
 }
 overview();if(tween){camera.position.copy(tween.to);controls.target.copy(tween.toTarget);tween=null;}controls.update();requestAnimationFrame(animate);debug.ready=true;$('#loading').style.opacity=0;setTimeout(()=>$('#loading').style.display='none',550);
+}
